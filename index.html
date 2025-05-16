@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hotel Ameobus - Cafe Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f4f4f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 2.5em;
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 10px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #login-section, #order-section {
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+        }
+        #login-section input {
+            padding: 8px;
+            font-size: 1rem;
+            margin-right: 10px;
+            width: 150px;
+        }
+        #login-section button {
+            padding: 8px 15px;
+            font-size: 1rem;
+            background-color: #2980b9;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #login-section button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #welcome-msg {
+            margin-top: 10px;
+            font-weight: bold;
+            color: green;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            table-layout: fixed;
+            text-align: center;
+        }
+        table th, table td {
+            border: 1.5px solid #2980b9;
+            padding: 10px 0;
+            vertical-align: middle;
+            word-wrap: break-word;
+        }
+        table th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: 600;
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+        .qty-controls button {
+            padding: 4px 10px;
+            margin: 0 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: 1px solid #2980b9;
+            background-color: white;
+            color: #2980b9;
+            border-radius: 4px;
+            user-select: none;
+        }
+        .qty-controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .qty-controls input {
+            width: 30px;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+            user-select: none;
+            background: transparent;
+        }
+        #place-order-btn, #sales-report-btn, #logout-btn {
+            background-color: #27ae60;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 15px 10px 0 0;
+        }
+        #place-order-btn:disabled, #sales-report-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        #sales-report {
+            max-width: 700px;
+            margin: 30px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
+        }
+        #sales-report table {
+            margin-top: 10px;
+        }
+        #sales-report th {
+            background-color: #34495e;
+            color: white;
+        }
+        .message-popup {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgb(0 0 0 / 0.2);
+            display: none;
+            z-index: 1000;
+        }
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+        #customer-name {
+            width: 100%;
+            padding: 8px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Hotel Ameobus</h1>
+
+    <div id="login-section">
+        <input type="text" id="username" placeholder="Username" />
+        <input type="password" id="password" placeholder="Password" />
+        <button id="login-btn">Login</button>
+        <button id="logout-btn" style="display:none;">Logout</button>
+        <div id="welcome-msg"></div>
+    </div>
+
+    <div id="order-section" style="display:none;">
+        <h2>Place Order</h2>
+        <label for="customer-name">Customer Name:</label>
+        <input type="text" id="customer-name" placeholder="Enter customer name" />
+        <table id="menu-table">
+            <thead>
+                <tr>
+                    <th style="width:10%;">S.No</th>
+                    <th style="width:50%;">Item</th>
+                    <th style="width:20%;">Price (₹)</th>
+                    <th style="width:20%;">Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Filled dynamically -->
+            </tbody>
+        </table>
+        <button id="place-order-btn" disabled>Place Order</button>
+        <button id="sales-report-btn" disabled>Show Sales Report</button>
+    </div>
+
+    <div id="sales-report" style="display:none;">
+        <h2>Sales Report</h2>
+        <p><strong>Total Orders:</strong> <span id="total-orders"></span></p>
+        <p><strong>Total Sales:</strong> ₹<span id="total-sales"></span></p>
+        <p><strong>Average Order Amount:</strong> ₹<span id="avg-order"></span></p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer Name</th>
+                    <th>Order Time</th>
+                    <th>Total Amount (₹)</th>
+                </tr>
+            </thead>
+            <tbody id="sales-report-body">
+                <!-- Filled dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="message-popup" id="popup-msg"></div>
+
+    <script>
+        const loginBtn = document.getElementById('login-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const welcomeMsg = document.getElementById('welcome-msg');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const orderSection = document.getElementById('order-section');
+        const placeOrderBtn = document.getElementById('place-order-btn');
+        const salesReportBtn = document.getElementById('sales-report-btn');
+        const menuTableBody = document.querySelector('#menu-table tbody');
+        const customerNameInput = document.getElementById('customer-name');
+        const salesReportDiv = document.getElementById('sales-report');
+        const totalOrdersSpan = document.getElementById('total-orders');
+        const totalSalesSpan = document.getElementById('total-sales');
+        const avgOrderSpan = document.getElementById('avg-order');
+        const salesReportBody = document.getElementById('sales-report-body');
+        const popupMsg = document.getElementById('popup-msg');
+
+        let loggedInUser = null;
+        let menuItems = [];
+
+        function showPopup(message, duration = 3000) {
+            popupMsg.textContent = message;
+            popupMsg.style.display = 'block';
+            setTimeout(() => {
+                popupMsg.style.display = 'none';
+            }, duration);
+        }
+
+        function fetchMenu() {
+            fetch('/menu')
+                .then(res => res.json())
+                .then(data => {
+                    menuItems = data;
+                    populateMenuTable();
+                })
+                .catch(() => {
+                    showPopup('Error loading menu.');
+                });
+        }
+
+        function populateMenuTable() {
+            menuTableBody.innerHTML = '';
+            menuItems.forEach((item, index) => {
+                const tr = document.createElement('tr');
+
+                const tdSNo = document.createElement('td');
+                tdSNo.textContent = index + 1;
+                tr.appendChild(tdSNo);
+
+                const tdName = document.createElement('td');
+                tdName.textContent = item.name;
+                tr.appendChild(tdName);
+
+                const tdPrice = document.createElement('td');
+                tdPrice.textContent = `₹${item.price.toFixed(2)}`;
+                tr.appendChild(tdPrice);
+
+                const tdQty = document.createElement('td');
+                tdQty.className = 'qty-controls';
+
+                const minusBtn = document.createElement('button');
+                minusBtn.textContent = '-';
+                minusBtn.disabled = true;
+
+                const qtyBox = document.createElement('input');
+                qtyBox.type = 'text';
+                qtyBox.value = '0';
+                qtyBox.readOnly = true;
+
+                const plusBtn = document.createElement('button');
+                plusBtn.textContent = '+';
+
+                minusBtn.addEventListener('click', () => {
+                    let qty = parseInt(qtyBox.value);
+                    if (qty > 0) {
+                        qty--;
+                        qtyBox.value = qty;
+                        if (qty === 0) minusBtn.disabled = true;
+                        updatePlaceOrderButton();
+                    }
+                });
+
+                plusBtn.addEventListener('click', () => {
+                    let qty = parseInt(qtyBox.value);
+                    qty++;
+                    qtyBox.value = qty;
+                    if (qty > 0) minusBtn.disabled = false;
+                    updatePlaceOrderButton();
+                });
+
+                tdQty.appendChild(minusBtn);
+                tdQty.appendChild(qtyBox);
+                tdQty.appendChild(plusBtn);
+
+                tr.appendChild(tdQty);
+                menuTableBody.appendChild(tr);
+            });
+        }
+
+        function updatePlaceOrderButton() {
+            const totalQty = Array.from(menuTableBody.querySelectorAll('input[type=text]'))
+                .reduce((acc, input) => acc + parseInt(input.value), 0);
+            placeOrderBtn.disabled = !(totalQty > 0 && customerNameInput.value.trim().length > 0);
+            salesReportBtn.disabled = false;
+        }
+
+        loginBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            if (!username || !password) {
+                showPopup('Please enter username and password.');
+                return;
+            }
+            fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Login failed');
+                    return res.json();
+                })
+                .then(data => {
+                    loggedInUser = data.username;
+                    welcomeMsg.textContent = `Welcome, ${loggedInUser}!`;
+                    loginBtn.style.display = 'none';
+                    logoutBtn.style.display = 'inline-block';
+                    usernameInput.style.display = 'none';
+                    passwordInput.style.display = 'none';
+                    orderSection.style.display = 'block';
+                    fetchMenu();
+                })
+                .catch(() => {
+                    showPopup('Invalid username or password.');
+                });
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            loggedInUser = null;
+            welcomeMsg.textContent = '';
+            loginBtn.style.display = 'inline-block';
+            logoutBtn.style.display = 'none';
+            usernameInput.style.display = 'inline-block';
+            passwordInput.style.display = 'inline-block';
+            orderSection.style.display = 'none';
+            salesReportDiv.style.display = 'none';
+            usernameInput.value = '';
+            passwordInput.value = '';
+            customerNameInput.value = '';
+            placeOrderBtn.disabled = true;
+            salesReportBtn.disabled = true;
+            menuTableBody.innerHTML = '';
+        });
+
+        customerNameInput.addEventListener('input', updatePlaceOrderButton);
+
+        placeOrderBtn.addEventListener('click', () => {
+            const customerName = customerNameInput.value.trim();
+            if (!customerName) {
+                showPopup('Please enter customer name.');
+                return;
+            }
+            const itemsToOrder = [];
+            Array.from(menuTableBody.querySelectorAll('tr')).forEach((tr, idx) => {
+                const qty = parseInt(tr.querySelector('input[type=text]').value);
+                if (qty > 0) {
+                    itemsToOrder.push({
+                        item_id: menuItems[idx].id,
+                        quantity: qty
+                    });
+                }
+            });
+            if (itemsToOrder.length === 0) {
+                showPopup('Please select at least one item.');
+                return;
+            }
+            fetch('/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customer_name: customerName, items: itemsToOrder })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showPopup(`Order placed successfully! Downloading bill...`);
+                        window.open(`/bill/${data.order_id}`, '_blank');
+                        customerNameInput.value = '';
+                        populateMenuTable();
+                        placeOrderBtn.disabled = true;
+                    } else {
+                        showPopup(data.message || 'Order failed.');
+                    }
+                })
+                .catch(() => {
+                    showPopup('Error placing order.');
+                });
+        });
+
+        salesReportBtn.addEventListener('click', () => {
+            fetch('/sales_report')
+                .then(res => res.json())
+                .then(data => {
+                    totalOrdersSpan.textContent = data.total_orders;
+                    totalSalesSpan.textContent = data.total_sales.toFixed(2);
+                    avgOrderSpan.textContent = data.average_order_amount.toFixed(2);
+                    salesReportBody.innerHTML = '';
+                    data.orders.forEach(order => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${order.order_id}</td>
+                            <td>${order.customer_name}</td>
+                            <td>${order.order_time}</td>
+                            <td>₹${order.total_amount.toFixed(2)}</td>
+                        `;
+                        salesReportBody.appendChild(tr);
+                    });
+                    salesReportDiv.style.display = 'block';
+                    window.scrollTo({ top: salesReportDiv.offsetTop, behavior: 'smooth' });
+                })
+                .catch(() => {
+                    showPopup('Error loading sales report.');
+                });
+        });
+    </script>
+</body>
+</html>
