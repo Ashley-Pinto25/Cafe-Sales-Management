@@ -77,6 +77,3 @@ Open your browser and go to:
 * Frontend is customizable via `index.html`.
 
 ```
-
-No YAML, no metadata, no extras — just pure Markdown content ready to go. Let me know if you want me to send the raw `.md` file too!
-```
